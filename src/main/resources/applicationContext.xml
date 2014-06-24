@@ -40,4 +40,17 @@
 		</bean>
 	</beans>
 
+    <beans profile="prod">
+        <bean class="java.net.URI" id="dbUrl">
+            <constructor-arg value="#{systemEnvironment['DATABASE_URL']}"/>
+        </bean>
+
+        <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+            <property name="url" value="jdbc:postgresql://localhost:5432/postgres"/>
+            <property name="username" value="postgress"/>
+            <property name="password" value="postgres"/>
+        </bean>
+        
+    </beans>
+
 </beans>
