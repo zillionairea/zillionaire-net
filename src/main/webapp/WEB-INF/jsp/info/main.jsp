@@ -37,27 +37,22 @@
 				<c:import url="/WEB-INF/jsp/info/menu.jsp" />
 			</div>
 			<div class="col-sm-9" style="background-color: #eee">
-				<div class="industory">
-					<c:forEach items="${industories}" var="industry" varStatus="index">
-						<button type="button" class="btn btn-default btn-xs" style="background-color: #fcc" onclick="actions.E01('${industry.id}')">${industry.name}</button>
-					</c:forEach>
+				<div class="industry">
+					<c:forEach items="${industries}" var="industry" varStatus="index"><button type="button" class="btn btn-default btn-xs" style="background-color: #fcc" onclick="actions.E01('${industry.industryCode}')">${industry.industryName}</button></c:forEach>
 				</div>
 				<div class="meigara">
-					<c:forEach items="${industories}" var="industry" varStatus="index">
-						<div class="idn_${industry.id}" style="display: none;">
-						<c:forEach items="${industry.stockList}" var="stock" varStatus="index">
-							<button type="button" class="btn btn-default btn-xs" style="background-color: #cfc" onclick="actions.E02('${stock.id}')">${stock.name}</button>
-						</c:forEach>
+					<c:forEach items="${stockList}" var="industry" varStatus="index">
+						<div class="idn_${industry.key}" style="display: none;">
+						<c:forEach items="${industry.value}" var="stock" varStatus="index"><button type="button" class="btn btn-default btn-xs" style="background-color: #cfc" onclick="actions.E02('${stock.stockCode}')">${stock.stockName}</button></c:forEach>
 						</div>
 					</c:forEach>
 				</div>
-				<div>
-					<img src="${context}/img/html5b.png">
+				<div class="content">
 				</div>
 			</div>
 		</div>
 	</section>
-	<footer class="container">免責事項など</footer>
+	<footer class="container">免責事項</footer>
 
 	<c:import url="/WEB-INF/jsp/foot.jsp" />
 </body>

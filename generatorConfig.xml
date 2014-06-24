@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+	<context id="postgres" targetRuntime="MyBatis3" defaultModelType="flat">
+	
+		<plugin type="org.mybatis.generator.plugins.ToStringPlugin" />
+		
+		<plugin type="net.zillions.mbg.CustomPlugin" />
+
+		<jdbcConnection driverClass="org.postgresql.Driver" connectionURL="jdbc:postgresql://localhost:5432/postgres"
+			userId="postgres" password="postgres" />
+
+		<javaModelGenerator targetPackage="net.zillions.buffett.model" targetProject="stock-simulator">
+			<property name="trimString" value="true" />
+			<property name="constructorBased" value="true" />
+		</javaModelGenerator>
+
+		<sqlMapGenerator targetPackage="net.zillions.buffett.mapper" targetProject="stock-simulator" />
+
+		<javaClientGenerator targetPackage="net.zillions.buffett.client" targetProject="stock-simulator" type="XMLMAPPER">
+			<property name="rootInterface" value="net.zillions.buffett.client.Mapper"/>
+		</javaClientGenerator>
+
+		<!-- table schema="public" tableName="tb_industry" modelType="flat" />
+		<table schema="public" tableName="tb_stock" modelType="flat" />
+		<table schema="public" tableName="tb_user" modelType="flat" / -->
+		<table schema="public" tableName="tb_memo" modelType="flat" />
+
+	</context>
+</generatorConfiguration>

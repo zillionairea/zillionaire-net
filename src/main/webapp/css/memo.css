@@ -1,0 +1,15 @@
+span.year {
+	cursor: pointer;
+	text-decoration: underline;
+}
+span.month {
+	cursor: pointer;
+	margin-left: 10px;
+	text-decoration: underline;
+}
+
+span.day {
+	cursor: pointer;
+	margin-left: 20px;
+	text-decoration: underline;
+}
