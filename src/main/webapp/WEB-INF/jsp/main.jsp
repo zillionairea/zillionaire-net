@@ -13,6 +13,9 @@
 </head>
 <body>
 	<h3>トップ画面</h3>
+	
+	<a href="/app/memo/">メモアプリ</a>
+	<a href="app/info/">株価情報表示アプリ</a>
 
 
 	<c:import url="/WEB-INF/jsp/foot.jsp" />

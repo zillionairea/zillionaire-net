@@ -15,7 +15,7 @@
 			<property name="constructorBased" value="true" />
 		</javaModelGenerator>
 
-		<sqlMapGenerator targetPackage="net.zillions.buffett.mapper" targetProject="stock-simulator" />
+		<sqlMapGenerator targetPackage="mapper" targetProject="stock-simulator/src/main/resources" />
 
 		<javaClientGenerator targetPackage="net.zillions.buffett.client" targetProject="stock-simulator" type="XMLMAPPER">
 			<property name="rootInterface" value="net.zillions.buffett.client.Mapper"/>
