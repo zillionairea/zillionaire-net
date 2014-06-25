@@ -21,10 +21,13 @@
 			<property name="rootInterface" value="net.zillions.buffett.client.Mapper"/>
 		</javaClientGenerator>
 
-		<!-- table schema="public" tableName="tb_industry" modelType="flat" />
+		<table schema="public" tableName="tb_industry" modelType="flat" />
 		<table schema="public" tableName="tb_stock" modelType="flat" />
-		<table schema="public" tableName="tb_user" modelType="flat" / -->
+		<table schema="public" tableName="tb_user" modelType="flat" />
 		<table schema="public" tableName="tb_memo" modelType="flat" />
+		<table schema="public" tableName="tb_bookmark" modelType="flat" />
+		<table schema="public" tableName="tb_label" modelType="flat" />
+		<table schema="public" tableName="tb_label_bookmark" modelType="flat" />
 
 	</context>
 </generatorConfiguration>

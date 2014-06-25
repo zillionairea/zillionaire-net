@@ -27,6 +27,11 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class MemoController {
 
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping("/memo/")
 	public ModelAndView init(HttpServletRequest request) {
 
@@ -60,6 +65,11 @@ public class MemoController {
 		return mav;
 	}
 
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping("/memo/search")
 	public ModelAndView search(HttpServletRequest request) {
 
@@ -169,6 +179,11 @@ public class MemoController {
 		return cale.getTime();
 	}
 
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping("/memo/add")
 	public String add(HttpServletRequest request) {
 
@@ -182,6 +197,11 @@ public class MemoController {
 		return "redirect:/app/memo/";
 	}
 
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping("/memo/delete")
 	public String delete(HttpServletRequest request) {
 

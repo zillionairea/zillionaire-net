@@ -1,0 +1,40 @@
+div.label_area h5 {
+    margin-left: 10px;
+}
+
+div.input_area input {
+    width: 582px;
+}
+
+div.input_area td {
+    padding-bottom: 3px;
+}
+
+table.bookmark {
+    margin-left: 5px;
+}
+
+table.bookmark td.star {
+    text-align: center;
+    vertical-align: middle;
+    width: 20px;
+}
+
+table.bookmark td.important {
+    text-align: center;
+    vertical-align: middle;
+    width: 20px;
+}
+
+table.bookmark td.title {
+    vertical-align: middle;
+    width: 200px;
+}
+
+table.bookmark td.delete {
+    text-align: center;
+    vertical-align: middle;
+    width: 100px;
+}
+
+

@@ -9,6 +9,7 @@
 <title>メモ</title>
 
 <c:import url="/WEB-INF/jsp/head.jsp" />
+<link href="/css/memo.css" rel="stylesheet">
 
 <script type="text/javascript">
 <!--
@@ -41,7 +42,7 @@
 <body>
 
 	<header class="container">
-		<h1>メモ</h1>
+		<h1><a href="/app/memo/">メモ</a></h1>
 	</header>
 	<section class="container">
 		<div class="row">
