@@ -1,24 +1,29 @@
 package net.zillions.buffett.form;
 
+import org.hibernate.validator.constraints.NotBlank;
+
 /**
  * 
  */
 public class BookmarkForm {
 
-	private String _url = null;
+	@NotBlank
+	private String url = null;
 
 	private String _title = null;
 
 	private String _description = null;
 
 	private String _label = null;
+	
+	private String _labelIds = null;
 
 	private String _star = null;
 
 	private String _important = null;
 
 	public void setUrl(String url) {
-		this._url = url;
+		this.url = url;
 	}
 
 	public void setTitle(String title) {
@@ -33,6 +38,10 @@ public class BookmarkForm {
 		this._label = label;
 	}
 
+	public void setLabelIds(String labelIds) {
+		this._labelIds = labelIds;
+	}
+
 	public void setStar(String star) {
 		this._star = star;
 	}
@@ -42,7 +51,7 @@ public class BookmarkForm {
 	}
 
 	public String getUrl() {
-		return this._url;
+		return this.url;
 	}
 
 	public String getTitle() {
@@ -55,6 +64,10 @@ public class BookmarkForm {
 
 	public String getLabel() {
 		return this._label;
+	}
+
+	public String getLabelIds() {
+		return this._labelIds;
 	}
 
 	public String getStar() {

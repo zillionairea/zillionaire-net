@@ -1,3 +1,7 @@
+label.error {
+	color: red;
+}
+
 div.label_area h5 {
     margin-left: 10px;
 }

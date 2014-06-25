@@ -18,13 +18,16 @@
 	var actions = {
 		E01 : function() {
 			$(".input_area").hide();
+			$("#invisible_button").hide();
 			$("#add_button").show();
 		},
 		E02 : function() {
 			$(".input_area").show();
+			$("#invisible_button").show();
 			$("#add_button").hide();
 		},
 		E03 : function() {
+			$("#labelIds").val(labels.join());
 			$("form").submit();
 		},
 		E04 : function() {
@@ -127,46 +130,46 @@
 				</div>
 			</div>
 			<div class="col-sm-10">
-				<button type="button" id="add_button" class="btn btn-primary btn-xs" onclick="actions.E02()">追加する</button>
-				<div class="input_area" style="display: none;">
+				<button type="button" id="add_button" class="btn btn-info btn-xs" style="display: none;" onclick="actions.E02()">追加する</button>
+				<button type="button" id="invisible_button" class="btn btn-info btn-xs" onclick="actions.E01()">非表示にする</button>
+				<div class="input_area">
 					<form:form modelAttribute="bookmarkForm" name="bookmark" action="/app/bookmark/add" method="post">
 						<table>
 							<tbody>
 								<tr>
-									<td style="width: 115px;">URL :</td>
-									<td><form:input path="url" /></td>
+									<td style="width: 115px;"><form:label path="url" cssErrorClass="error">URL :</form:label></td>
+									<td><form:input path="url" onblur="actions.E12()"/><br><form:errors path="url" cssStyle="color:red; font-weight: bold;"/></td>
 								</tr>
 								<tr>
-									<td>TITLE :</td>
+									<td><form:label path="title" cssErrorClass="error">TITLE :</form:label></td>
 									<td><form:input path="title" /></td>
 								</tr>
 								<tr>
-									<td>DESCRIPTION :</td>
+									<td><form:label path="description" cssErrorClass="error">DESCRIPTION :</form:label></td>
 									<td><form:textarea path="description" cols="80" rows="2" /></td>
 								</tr>
 								<tr>
-									<td>LABEL :</td>
+									<td><form:label path="label" cssErrorClass="error">LABEL :</form:label></td>
 									<td><form:input path="label" style="width: 200px;" /><br>
 									<c:forEach items="${labels}" var="label">
 										<button type="button" id="label_button_${label.labelId}" class="btn btn-default btn-xs" onclick="actions.E10('${label.labelId}')">${label.labelName}</button>&nbsp;
 									</c:forEach>
 								</tr>
 								<tr>
-									<td>MARK :</td>
+									<td><form:label path="star" cssErrorClass="error">MARK :</form:label></td>
 									<td><button type="button" id="star_button" class="btn btn-default btn-xs" onclick="actions.E11('star')">スター</button>&nbsp;☆&nbsp;&nbsp;
 										<button type="button" id="important_button" class="btn btn-default btn-xs" onclick="actions.E11('important')">重要</button>&nbsp;◎</td>
 								</tr>
 								<tr>
 									<td></td>
 									<td><button type="button" class="btn btn-primary btn-sm" onclick="actions.E03()">追加</button>&nbsp;
-										<button type="button" class="btn btn-primary btn-sm" onclick="actions.E04()">更新</button>&nbsp;
-										<button type="button" class="btn btn-default btn-sm" onclick="actions.E01()">非表示</button>&nbsp;
-										<button type="button" class="btn btn-default btn-sm" onclick="actions.E12()">テスト</button></td>
+										<button type="button" class="btn btn-primary btn-sm" onclick="actions.E04()">更新</button></td>
 								</tr>
 							</tbody>
 						</table>
 						<form:hidden path="star" />
 						<form:hidden path="important" />
+						<form:hidden path="labelIds" />
 						
 					</form:form>
 				</div>

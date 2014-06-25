@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import net.zillions.buffett.BuffettUtils;
 import net.zillions.buffett.client.TbBookmarkMapper;
@@ -21,9 +22,11 @@ import net.zillions.buffett.model.TbLabelExample;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * 
@@ -186,11 +189,28 @@ public class BookmarkController {
 	 * @return
 	 */
 	@RequestMapping("/bookmark/add")
-	public String add(BookmarkForm bookmarkForm) {
+	public String add(@Valid BookmarkForm bookmarkForm, BindingResult result, RedirectAttributes attr) {
+		
+		if (result.hasErrors()) {
+			attr.addFlashAttribute("org.springframework.validation.BindingResult.bookmarkForm", result);
+			attr.addFlashAttribute("bookmarkForm", bookmarkForm);
+			return "redirect:/app/bookmark/";
+		}
 
 		String userId = DEFALT_USER_ID;
 
 		int bookmarkId = addBookmark(bookmarkForm, userId);
+		
+		String labelIdsValue = bookmarkForm.getLabelIds();
+		if (labelIdsValue != null) {
+			for (String labelId : labelIdsValue.split(",")) {
+				if (BuffettUtils.isDigit(labelId) == false) {
+					continue;
+				}
+				_tbLabelBookmarkMapper.insertSelective(new TbLabelBookmark(Integer.parseInt(labelId), bookmarkId, userId, null,
+						userId, null, null));
+			}
+		}		
 
 		String labelValue = bookmarkForm.getLabel();
 		if (labelValue == null || labelValue.isEmpty()) {
