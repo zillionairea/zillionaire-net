@@ -34,6 +34,10 @@ span.mark {
 	cursor: pointer;
 }
 
+span.bookmarkId {
+	font-size: x-small;
+}
+
 table.bookmark td.on {
 	color : red;	
 }

@@ -291,7 +291,7 @@
 									<tr>
 										<td id="mark_star_${bookmark.bookmarkId}" class="star ${bookmark.star ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', true)">★</span></td>
 										<td id="mark_important_${bookmark.bookmarkId}" class="important ${bookmark.important ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', false)">●</span></td>
-										<td class="title"><a href="#" onclick="actions.E13('${bookmark.bookmarkId}', '${labelAndBookmarks.key[0]}', '${bookmark.url}')"><c:out value="${bookmark.title}" /></a></td>
+										<td class="title"><a href="#" onclick="actions.E13('${bookmark.bookmarkId}', '${labelAndBookmarks.key[0]}', '${bookmark.url}')"><c:out value="${bookmark.title}" /></a><span class="bookmarkId">${bookmark.bookmarkId}</span></td>
 										<td class="description"><c:out value="${bookmark.description}" /></td>
 										<td class="delete"><button type="button" class="btn btn-default btn-xs" onclick="actions.E05('${bookmark.url}', '${bookmark.title}', '${bookmark.description}', '${bookmark.joinedLabelIds}', ${bookmark.star}, ${bookmark.important})">編集</button>&nbsp;<button
 											type="button" class="btn btn-default btn-xs" onclick="actions.E06('${bookmark.bookmarkId}')">削除</button></td>
