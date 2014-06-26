@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import net.zillions.buffett.BuffettUtils;
@@ -22,6 +23,12 @@ import net.zillions.buffett.model.TbLabelBookmark;
 import net.zillions.buffett.model.TbLabelBookmarkExample;
 import net.zillions.buffett.model.TbLabelBookmarkExample.Criteria;
 import net.zillions.buffett.model.TbLabelExample;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.OAuthProvider;
+import oauth.signpost.basic.DefaultOAuthConsumer;
+import oauth.signpost.basic.DefaultOAuthProvider;
+import oauth.signpost.exception.OAuthException;
+import oauth.signpost.http.HttpParameters;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -66,12 +73,33 @@ public class BookmarkController {
 	 * @return
 	 */
 	@RequestMapping("/bookmark/")
-	public ModelAndView init(HttpServletRequest request) {
+	public ModelAndView init(HttpServletRequest request, HttpSession session) throws OAuthException {
 
 		String userId = DEFALT_USER_ID;
-
 		ModelAndView mav = new ModelAndView("bookmark/main");
 
+		if (session.getAttribute("consumer") != null && session.getAttribute("userId") == null) {
+		    OAuthConsumer consumer = (OAuthConsumer) session.getAttribute("consumer");
+		    OAuthProvider provider = (OAuthProvider) session.getAttribute("provider");
+		  
+		    String oauth_verifier = request.getParameter("oauth_verifier");
+		    provider.retrieveAccessToken(consumer, oauth_verifier);
+//		    String accessToken = consumer.getToken();
+//		    String tokenSecret = consumer.getTokenSecret();
+		  
+		    HttpParameters hp = provider.getResponseParameters();
+		    session.setAttribute("userId", hp.get("user_id").first());
+		    session.setAttribute("userName", hp.get("screen_name").first());
+		    
+		}
+	    
+		if (session.getAttribute("userId") != null) {
+			userId = session.getAttribute("userId").toString();
+		}
+		if (session.getAttribute("userName") != null) {
+		    mav.addObject("userName", session.getAttribute("userName").toString());
+		}
+		
 		//
 		List<TbLabel> labels = getLabels(userId);
 		mav.addObject("labels", labels);
@@ -129,9 +157,12 @@ public class BookmarkController {
 	}
 
 	@RequestMapping("/bookmark/select")
-	public ModelAndView select(HttpServletRequest request) {
+	public ModelAndView select(HttpServletRequest request, HttpSession session) {
 
 		String userId = DEFALT_USER_ID;
+		if (session.getAttribute("userId") != null) {
+			userId = session.getAttribute("userId").toString();
+		}
 
 		String starValue = request.getParameter("star");
 		String importantValue = request.getParameter("important");
@@ -306,7 +337,7 @@ public class BookmarkController {
 	 * @return
 	 */
 	@RequestMapping("/bookmark/add")
-	public String add(@Valid BookmarkForm bookmarkForm, BindingResult result, RedirectAttributes attr) {
+	public String add(@Valid BookmarkForm bookmarkForm, BindingResult result, RedirectAttributes attr, HttpSession session) {
 
 		if (result.hasErrors()) {
 			attr.addFlashAttribute("org.springframework.validation.BindingResult.bookmarkForm", result);
@@ -315,6 +346,9 @@ public class BookmarkController {
 		}
 
 		String userId = DEFALT_USER_ID;
+		if (session.getAttribute("userId") != null) {
+			userId = session.getAttribute("userId").toString();
+		}
 
 		int bookmarkId = addBookmark(bookmarkForm, userId);
 
@@ -414,7 +448,7 @@ public class BookmarkController {
 	 * @return
 	 */
 	@RequestMapping("/bookmark/update")
-	public String update(@Valid BookmarkForm bookmarkForm, BindingResult result, RedirectAttributes attr) {
+	public String update(@Valid BookmarkForm bookmarkForm, BindingResult result, RedirectAttributes attr, HttpSession session) {
 		
 		if (result.hasErrors()) {
 			attr.addFlashAttribute("org.springframework.validation.BindingResult.bookmarkForm", result);
@@ -423,6 +457,9 @@ public class BookmarkController {
 		}
 
 		String userId = DEFALT_USER_ID;
+		if (session.getAttribute("userId") != null) {
+			userId = session.getAttribute("userId").toString();
+		}
 		
 		int bookmarkId = bookmarkForm.getBookmarkId();
 		if (_tbBookmarkMapper.findByPk(bookmarkId) == null) {
@@ -514,9 +551,12 @@ public class BookmarkController {
 	 
 	
 	@RequestMapping("/bookmark/updateMark")
-	public ModelAndView updateMark(HttpServletRequest request) {
+	public ModelAndView updateMark(HttpServletRequest request, HttpSession session) {
 
 		String userId = DEFALT_USER_ID;
+		if (session.getAttribute("userId") != null) {
+			userId = session.getAttribute("userId").toString();
+		}
 
 		String bookmarkIdValue = request.getParameter("bookmarkId");
 		if (BuffettUtils.isDigit(bookmarkIdValue) == false) {
@@ -552,9 +592,12 @@ public class BookmarkController {
 	 * @return
 	 */
 	@RequestMapping("/bookmark/delete")
-	public String delete(HttpServletRequest request) {
+	public String delete(HttpServletRequest request, HttpSession session) {
 
 		String userId = DEFALT_USER_ID;
+		if (session.getAttribute("userId") != null) {
+			userId = session.getAttribute("userId").toString();
+		}
 
 		String bookmarkIdValue = request.getParameter("bookmarkId");
 		if (BuffettUtils.isDigit(bookmarkIdValue) == false) {
@@ -608,9 +651,12 @@ public class BookmarkController {
 	
 
 	@RequestMapping("/bookmark/countUp")
-	public synchronized ModelAndView countUp(HttpServletRequest request) {
+	public synchronized ModelAndView countUp(HttpServletRequest request, HttpSession session) {
 
 		String userId = DEFALT_USER_ID;
+		if (session.getAttribute("userId") != null) {
+			userId = session.getAttribute("userId").toString();
+		}
 
 		String bookmarkIdValue = request.getParameter("bookmarkId");
 		if (BuffettUtils.isDigit(bookmarkIdValue)) {
@@ -633,7 +679,29 @@ public class BookmarkController {
 		mav.addObject("result", "0");
 		return mav;
 	}
+	
+	@RequestMapping("/bookmark/oauth")
+	public ModelAndView oauth(HttpSession session) throws OAuthException {
+		
+		OAuthConsumer consumer = new DefaultOAuthConsumer("KrR7XUS4M5hzPB5Cx86BtbVLt",
+				"yh8T8JvHrCdzUEVHLmvtCktYKCD3GTBVYRdRW2IMRdjarOrnDu");
+		OAuthProvider provider = new DefaultOAuthProvider("https://api.twitter.com/oauth/request_token",
+				"https://api.twitter.com/oauth/access_token", "https://api.twitter.com/oauth/authorize");
 
+		session.setAttribute("consumer", consumer);
+		session.setAttribute("provider", provider);
+
+		String callbackUri = "http://zillions-net.herokuapp.com/app/bookmark/";
+//		String callbackUri = "http://localhost:8080/app/bookmark/";
+		String authUrl = provider.retrieveRequestToken(consumer, callbackUri);
+		return new ModelAndView("redirect:" + authUrl);
+	}
+	
+
+	/**
+	 * 
+	 *
+	 */
 	public static class TbBookmarkWithLabelIds extends TbBookmark {
 		/**
 		 * 

@@ -11,7 +11,7 @@ public class BookmarkControllerTest {
 	public void init(){
 		BookmarkController controller = new BookmarkController();
 		
-		controller.init(null);
+//		controller.init(null);
 		
 	}
 }
