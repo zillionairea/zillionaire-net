@@ -42,7 +42,7 @@
 <body>
 
 	<header class="container"><c:import url="/WEB-INF/jsp/header.jsp" >
-		<c:param name="url" value="/app//app/memo//" />
+		<c:param name="url" value="/app//app/memo/" />
 		<c:param name="name" value="メモ" />
 	</c:import></header>
 	<section class="container">
