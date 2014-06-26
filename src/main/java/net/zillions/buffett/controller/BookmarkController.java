@@ -79,27 +79,26 @@ public class BookmarkController {
 		ModelAndView mav = new ModelAndView("bookmark/main");
 
 		if (session.getAttribute("consumer") != null && session.getAttribute("userId") == null) {
-		    OAuthConsumer consumer = (OAuthConsumer) session.getAttribute("consumer");
-		    OAuthProvider provider = (OAuthProvider) session.getAttribute("provider");
-		  
-		    String oauth_verifier = request.getParameter("oauth_verifier");
-		    provider.retrieveAccessToken(consumer, oauth_verifier);
-//		    String accessToken = consumer.getToken();
-//		    String tokenSecret = consumer.getTokenSecret();
-		  
-		    HttpParameters hp = provider.getResponseParameters();
-		    session.setAttribute("userId", hp.get("user_id").first());
-		    session.setAttribute("userName", hp.get("screen_name").first());
-		    
+			OAuthConsumer consumer = (OAuthConsumer) session.getAttribute("consumer");
+			OAuthProvider provider = (OAuthProvider) session.getAttribute("provider");
+
+			String oauth_verifier = request.getParameter("oauth_verifier");
+			provider.retrieveAccessToken(consumer, oauth_verifier);
+			// String accessToken = consumer.getToken();
+			// String tokenSecret = consumer.getTokenSecret();
+
+			HttpParameters hp = provider.getResponseParameters();
+			session.setAttribute("userId", hp.get("user_id").first());
+			session.setAttribute("userName", hp.get("screen_name").first());
 		}
-	    
+
 		if (session.getAttribute("userId") != null) {
 			userId = session.getAttribute("userId").toString();
 		}
-		if (session.getAttribute("userName") != null) {
-		    mav.addObject("userName", session.getAttribute("userName").toString());
-		}
-		
+//		if (session.getAttribute("userName") != null) {
+//			mav.addObject("userName", session.getAttribute("userName").toString());
+//		}
+
 		//
 		List<TbLabel> labels = getLabels(userId);
 		mav.addObject("labels", labels);
@@ -130,7 +129,8 @@ public class BookmarkController {
 			tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdIn(bookmarkIds);
 			List<TbBookmark> bookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 
-			labelAndBookmarks.put(new String[] {label.getLabelId().toString(), label.getLabelName()}, TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(bookmarks));
+			labelAndBookmarks.put(new String[] {label.getLabelId().toString(), label.getLabelName()},
+					TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(bookmarks));
 
 		}
 
@@ -225,13 +225,13 @@ public class BookmarkController {
 					tbBookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 
 					if (tbBookmarks.isEmpty() == false) {
-						labelAndBookmarks
-								.put(new String[] {tbLabel.getLabelId().toString(), tbLabel.getLabelName()}, TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(tbBookmarks));
+						labelAndBookmarks.put(new String[] {tbLabel.getLabelId().toString(), tbLabel.getLabelName()},
+								TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(tbBookmarks));
 					}
 				} else {
 					// ラベル無しのブックマークを表示する
-					String[] key = new String[]{"-1", "ラベル無し"};
-					
+					String[] key = new String[] {"-1", "ラベル無し"};
+
 					List<TbBookmark> tbBookmarksAll = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 					for (TbBookmark tbBookmark : tbBookmarksAll) {
 						TbLabelBookmarkExample tbLabelBookmarkExample = new TbLabelBookmarkExample();
@@ -244,8 +244,8 @@ public class BookmarkController {
 							}
 							tbBookmarksWithoutLabel.add(new TbBookmarkWithLabelIds(tbBookmark));
 						}
-					}					
-					
+					}
+
 				}
 			}
 		}
@@ -263,13 +263,12 @@ public class BookmarkController {
 		tbLabelExample.createCriteria().andUpdateUserEqualTo(updateUser);
 		tbLabelExample.setOrderByClause("use_count desc");
 		List<TbLabel> labels = _tbLabelMapper.selectByEx(tbLabelExample);
-		
-		
+
 		// ラベルが無いブックマークがないか探す
 		TbBookmarkExample tbBookmarkExample = new TbBookmarkExample();
 		tbBookmarkExample.createCriteria().andUpdateUserEqualTo(updateUser);
 		List<TbBookmark> tbBookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
-		
+
 		for (TbBookmark tbBookmark : tbBookmarks) {
 			int bookmarkId = tbBookmark.getBookmarkId();
 
@@ -281,7 +280,7 @@ public class BookmarkController {
 				break;
 			}
 		}
-		
+
 		return labels;
 	}
 
@@ -449,7 +448,7 @@ public class BookmarkController {
 	 */
 	@RequestMapping("/bookmark/update")
 	public String update(@Valid BookmarkForm bookmarkForm, BindingResult result, RedirectAttributes attr, HttpSession session) {
-		
+
 		if (result.hasErrors()) {
 			attr.addFlashAttribute("org.springframework.validation.BindingResult.bookmarkForm", result);
 			attr.addFlashAttribute("bookmarkForm", bookmarkForm);
@@ -460,12 +459,12 @@ public class BookmarkController {
 		if (session.getAttribute("userId") != null) {
 			userId = session.getAttribute("userId").toString();
 		}
-		
+
 		int bookmarkId = bookmarkForm.getBookmarkId();
 		if (_tbBookmarkMapper.findByPk(bookmarkId) == null) {
 			return "redirect:/app/bookmark/";
 		}
-		
+
 		TbBookmark tbBookmark = new TbBookmark();
 		tbBookmark.setBookmarkId(bookmarkId);
 		tbBookmark.setUrl(bookmarkForm.getUrl());
@@ -478,10 +477,10 @@ public class BookmarkController {
 		_tbBookmarkMapper.updateByPkSelective(tbBookmark);
 
 		// ボタンのラベル
-		
+
 		List<Integer> currentLabelIdsRelated = getLabelIdsRelated(bookmarkId);
 		List<Integer> updateLabelIdsRelated = new ArrayList<>();
-		
+
 		String labelIdsValue = bookmarkForm.getLabelIds();
 		if (labelIdsValue != null && labelIdsValue.isEmpty() == false) {
 			for (String labelId : labelIdsValue.split(",")) {
@@ -491,14 +490,14 @@ public class BookmarkController {
 				updateLabelIdsRelated.add(Integer.parseInt(labelId));
 			}
 		}
-		
+
 		// 更新後のラベルに含まれない現在のラベルは削除
 		for (Integer currentLabelId : currentLabelIdsRelated) {
 			if (updateLabelIdsRelated.contains(currentLabelId) == false) {
 				deleteLabelBookmark(bookmarkId, currentLabelId, userId);
 			}
 		}
-		
+
 		// 現在のラベルに含まれない更新後のラベルを追加
 		for (Integer updateLabelId : updateLabelIdsRelated) {
 			if (currentLabelIdsRelated.contains(updateLabelId) == false) {
@@ -506,7 +505,7 @@ public class BookmarkController {
 				_tbLabelBookmarkMapper.insertSelective(tbLabelBookmark);
 			}
 		}
-		
+
 		// テキストのラベル
 		String labelValue = bookmarkForm.getLabel();
 		if (labelValue == null || labelValue.isEmpty()) {
@@ -519,7 +518,7 @@ public class BookmarkController {
 			label = label.trim();
 
 			int labelId = isLabelNameExist(label, userId) ? findLabelId(label, userId) : addLabel(label, userId);
-			
+
 			// 既に関係が存在すれば、追加はしない
 			if (_tbLabelBookmarkMapper.findByPk(labelId, bookmarkId) != null) {
 				continue;
@@ -531,7 +530,7 @@ public class BookmarkController {
 
 		return "redirect:/app/bookmark/";
 	}
-	
+
 	/**
 	 * 
 	 * @param bookmarkId
@@ -547,9 +546,7 @@ public class BookmarkController {
 		}
 		return labelIds;
 	}
-	
-	 
-	
+
 	@RequestMapping("/bookmark/updateMark")
 	public ModelAndView updateMark(HttpServletRequest request, HttpSession session) {
 
@@ -606,21 +603,21 @@ public class BookmarkController {
 
 		int bookmarkId = Integer.parseInt(bookmarkIdValue);
 		_tbBookmarkMapper.deleteByPk(bookmarkId);
-		
+
 		deleteLabelBookmark(bookmarkId, -1, userId);
 
 		return "redirect:/app/bookmark/";
 	}
-	
+
 	/**
 	 * 
 	 * @param bookmarkId
 	 * @param userId
 	 */
 	private void deleteLabelBookmark(int bookmarkId, int labelId, String userId) {
-		
+
 		TbLabelBookmarkExample tbLabelBookmarkExample = new TbLabelBookmarkExample();
-		
+
 		Criteria criteria = tbLabelBookmarkExample.createCriteria().andUpdateUserEqualTo(userId);
 		if (bookmarkId > 0) {
 			criteria.andBookmarkIdEqualTo(bookmarkId);
@@ -628,7 +625,7 @@ public class BookmarkController {
 		if (labelId > 0) {
 			criteria.andLabelIdEqualTo(labelId);
 		}
-		
+
 		List<TbLabelBookmark> labelBookmarks = _tbLabelBookmarkMapper.selectByEx(tbLabelBookmarkExample);
 
 		List<Integer> deletedLabelIds = new ArrayList<>();
@@ -647,8 +644,6 @@ public class BookmarkController {
 		}
 
 	}
-	
-	
 
 	@RequestMapping("/bookmark/countUp")
 	public synchronized ModelAndView countUp(HttpServletRequest request, HttpSession session) {
@@ -679,24 +674,32 @@ public class BookmarkController {
 		mav.addObject("result", "0");
 		return mav;
 	}
-	
+
 	@RequestMapping("/bookmark/oauth")
 	public ModelAndView oauth(HttpSession session) throws OAuthException {
-		
-		OAuthConsumer consumer = new DefaultOAuthConsumer("KrR7XUS4M5hzPB5Cx86BtbVLt",
+
+		// @formatter:off
+		OAuthConsumer consumer = new DefaultOAuthConsumer(
+				"KrR7XUS4M5hzPB5Cx86BtbVLt",
 				"yh8T8JvHrCdzUEVHLmvtCktYKCD3GTBVYRdRW2IMRdjarOrnDu");
-		OAuthProvider provider = new DefaultOAuthProvider("https://api.twitter.com/oauth/request_token",
-				"https://api.twitter.com/oauth/access_token", "https://api.twitter.com/oauth/authorize");
+		
+		OAuthProvider provider = new DefaultOAuthProvider(
+				"https://api.twitter.com/oauth/request_token",
+				"https://api.twitter.com/oauth/access_token",
+				"https://api.twitter.com/oauth/authorize");
+		// @formatter:on
 
 		session.setAttribute("consumer", consumer);
 		session.setAttribute("provider", provider);
 
-		String callbackUri = "http://zillions-net.herokuapp.com/app/bookmark/";
-//		String callbackUri = "http://localhost:8080/app/bookmark/";
+		String hostName = System.getProperty("HOST_NAME");
+		if (hostName == null) {
+			hostName = "localhost:8080";
+		}
+		String callbackUri = "http://" + hostName + "/app/bookmark/";
 		String authUrl = provider.retrieveRequestToken(consumer, callbackUri);
 		return new ModelAndView("redirect:" + authUrl);
 	}
-	
 
 	/**
 	 * 
@@ -745,7 +748,7 @@ public class BookmarkController {
 		public void setLabelIds(List<Integer> labelIds) {
 			this._labelIds = labelIds;
 		}
-		
+
 		public String getJoinedLabelIds() {
 			StringBuilder sb = new StringBuilder();
 			for (Integer labelId : _labelIds) {
