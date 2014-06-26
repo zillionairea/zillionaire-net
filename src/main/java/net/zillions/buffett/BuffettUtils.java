@@ -8,8 +8,12 @@ public final class BuffettUtils {
 	 * @return
 	 */
 	public static boolean isDigit(String value) {
-		if (value == null) {
+		if (value == null || "-".equals(value)) {
 			return false;
+		}
+		
+		if (value.startsWith("-")) {
+			value = value.substring(1);
 		}
 
 		for (char ch : value.toCharArray()) {

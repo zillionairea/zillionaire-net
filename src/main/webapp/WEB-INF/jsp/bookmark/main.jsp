@@ -27,14 +27,20 @@
 			$("#add_button").hide();
 		},
 		E03 : function() {
+			// 追加
 			$("#labelIds").val(labels.join());
+			$("form").attr("action", "/app/bookmark/add");
 			$("form").submit();
 		},
 		E04 : function() {
 			// 更新
+			$("#labelIds").val(labels.join());
+			$("form").attr("action", "/app/bookmark/update");
+			$("form").submit();
 		},
-		E05 : function(url, title, description, labelIdsValue, star, important) {
+		E05 : function(bookmarkId, url, title, description, labelIdsValue, star, important) {
 			// 編集
+			$("#bookmarkId").val(bookmarkId);
 			$("#url").val(url);
 			$("#title").val(title);
 			$("#description").val(description);
@@ -239,7 +245,7 @@
 				<button type="button" id="add_button" class="btn btn-info btn-xs" onclick="actions.E02()">ブックマークを追加する</button>
 				<button type="button" id="invisible_button" class="btn btn-info btn-xs" style="display: none;" onclick="actions.E01()">入力エリアを非表示にする</button>
 				<div class="input_area" style="display: none; margin-top: 2px;">
-					<form:form modelAttribute="bookmarkForm" name="bookmark" action="/app/bookmark/add" method="post">
+					<form:form modelAttribute="bookmarkForm" name="bookmark" action="" method="post">
 						<table>
 							<tbody>
 								<tr>
@@ -259,23 +265,25 @@
 									<td><form:input path="label" style="width: 200px;" /><br>
 									<span id="label_buttons">
 									<c:forEach items="${labels}" var="label">
-										<button type="button" id="label_button_${label.labelId}" class="btn btn-default btn-xs" onclick="actions.E10('${label.labelId}')">${label.labelName}</button>&nbsp;
+										<c:if test="${label.labelId > 0 }">
+											<button type="button" id="label_button_${label.labelId}" class="btn btn-default btn-xs" onclick="actions.E10('${label.labelId}')">${label.labelName}</button>&nbsp;
+										</c:if>
 									</c:forEach>
 									</span>
 								</tr>
 								<tr>
 									<td><form:label path="star" cssErrorClass="error">MARK :</form:label></td>
-									<td><button type="button" id="star_button" class="btn btn-default btn-xs" onclick="actions.E11('star')">スター</button>&nbsp;☆&nbsp;&nbsp;
-										<button type="button" id="important_button" class="btn btn-default btn-xs" onclick="actions.E11('important')">重要</button>&nbsp;◎</td>
+									<td><button type="button" id="star_button" class="btn btn-default btn-xs" onclick="actions.E11('star')">スター</button>&nbsp;<span class="on">★</span>&nbsp;&nbsp;
+										<button type="button" id="important_button" class="btn btn-default btn-xs" onclick="actions.E11('important')">重要</button>&nbsp;<span class="on">◆</span></td>
 								</tr>
 								<tr>
 									<td></td>
 									<td><button type="button" class="btn btn-primary btn-sm" onclick="actions.E03()">追加</button>&nbsp;
-										<button type="button" class="btn btn-primary btn-sm" onclick="actions.E04()">更新</button>
-										<button type="button" class="btn btn-primary btn-sm" onclick="utils.test()">テスト</button></td>
+										<button type="button" class="btn btn-primary btn-sm" onclick="actions.E04()">更新</button></td>
 								</tr>
 							</tbody>
 						</table>
+						<form:hidden path="bookmarkId" />
 						<form:hidden path="star" />
 						<form:hidden path="important" />
 						<form:hidden path="labelIds" />
@@ -290,10 +298,10 @@
 								<c:forEach items="${labelAndBookmarks.value}" var="bookmark">
 									<tr>
 										<td id="mark_star_${bookmark.bookmarkId}" class="star ${bookmark.star ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', true)">★</span></td>
-										<td id="mark_important_${bookmark.bookmarkId}" class="important ${bookmark.important ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', false)">●</span></td>
+										<td id="mark_important_${bookmark.bookmarkId}" class="important ${bookmark.important ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', false)">◆</span></td>
 										<td class="title"><a href="#" onclick="actions.E13('${bookmark.bookmarkId}', '${labelAndBookmarks.key[0]}', '${bookmark.url}')"><c:out value="${bookmark.title}" /></a><span class="bookmarkId">${bookmark.bookmarkId}</span></td>
 										<td class="description"><c:out value="${bookmark.description}" /></td>
-										<td class="delete"><button type="button" class="btn btn-default btn-xs" onclick="actions.E05('${bookmark.url}', '${bookmark.title}', '${bookmark.description}', '${bookmark.joinedLabelIds}', ${bookmark.star}, ${bookmark.important})">編集</button>&nbsp;<button
+										<td class="delete"><button type="button" class="btn btn-default btn-xs" onclick="actions.E05('${bookmark.bookmarkId}', '${bookmark.url}', '${bookmark.title}', '${bookmark.description}', '${bookmark.joinedLabelIds}', ${bookmark.star}, ${bookmark.important})">編集</button>&nbsp;<button
 											type="button" class="btn btn-default btn-xs" onclick="actions.E06('${bookmark.bookmarkId}')">削除</button></td>
 									</tr>
 								</c:forEach>

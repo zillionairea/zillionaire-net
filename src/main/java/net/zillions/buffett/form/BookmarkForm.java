@@ -6,9 +6,11 @@ import org.hibernate.validator.constraints.NotBlank;
  * 
  */
 public class BookmarkForm {
+	
+	private int _bookmarkId = -1;
 
 	@NotBlank
-	private String url = null;
+	private String _url = null;
 
 	private String _title = null;
 
@@ -21,9 +23,13 @@ public class BookmarkForm {
 	private String _star = null;
 
 	private String _important = null;
+	
+	public void setBookmarkId(int bookmarkId) {
+		this._bookmarkId = bookmarkId;
+	}
 
 	public void setUrl(String url) {
-		this.url = url;
+		this._url = url;
 	}
 
 	public void setTitle(String title) {
@@ -49,9 +55,13 @@ public class BookmarkForm {
 	public void setImportant(String important) {
 		this._important = important;
 	}
+	
+	public int getBookmarkId() {
+		return this._bookmarkId;
+	}
 
 	public String getUrl() {
-		return this.url;
+		return this._url;
 	}
 
 	public String getTitle() {

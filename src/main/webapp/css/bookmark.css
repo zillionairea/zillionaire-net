@@ -38,11 +38,11 @@ span.bookmarkId {
 	font-size: x-small;
 }
 
-table.bookmark td.on {
+.on {
 	color : red;	
 }
 
-table.bookmark td.off {
+.off {
 	color : black;	
 }
 
