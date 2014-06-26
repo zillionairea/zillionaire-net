@@ -225,9 +225,10 @@
 
 <body>
 
-	<header class="container">
-		<h1><a href="/app/bookmark/">Bookmark</a></h1>
-	</header>
+	<header class="container"><c:import url="/WEB-INF/jsp/header.jsp" >
+		<c:param name="url" value="/app/bookmark/" />
+		<c:param name="name" value="Bookmark" />
+	</c:import></header>
 	<section class="container">
 		<div class="row">
 			<div class="col-sm-2">

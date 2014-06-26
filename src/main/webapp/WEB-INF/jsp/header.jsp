@@ -1,0 +1,1 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><h1><a href="/app/"><img src="/favicon.ico"  width="25px" height="25px" style="margin-bottom: 8px;"></a><a href="${param.url}">${param.name}</a></h1>
