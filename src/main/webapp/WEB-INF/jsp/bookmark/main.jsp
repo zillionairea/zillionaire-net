@@ -236,7 +236,7 @@
 					<h4><a href="#" onclick="actions.E08()">重要</a></h4>
 					<h4>ラベル</h4>
 					<c:forEach items="${labels}" var="labels">
-						<h5><a href="#" onclick="actions.E09('${labels.labelId}')">${labels.labelName}</a><span class="count">&nbsp(${labels.labelId}, ${labels.useCount})</span></h5>
+						<h5><a href="#" onclick="actions.E09('${labels.labelId}')">${labels.labelName}</a><span class="count">&nbsp<c:if test="${labels.labelId > 0}">(${labels.labelId}, ${labels.useCount})</c:if></span></h5>
 					</c:forEach>
 				</div>
 			</div>
