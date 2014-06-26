@@ -25,9 +25,21 @@ table.bookmark td.star {
 }
 
 table.bookmark td.important {
-    text-align: center;
+	text-align: center;
     vertical-align: middle;
     width: 20px;
+}
+
+span.mark {
+	cursor: pointer;
+}
+
+table.bookmark td.on {
+	color : red;	
+}
+
+table.bookmark td.off {
+	color : black;	
 }
 
 table.bookmark td.title {

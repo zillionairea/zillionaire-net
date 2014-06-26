@@ -33,8 +33,45 @@
 		E04 : function() {
 			// 更新
 		},
-		E05 : function() {
+		E05 : function(url, title, description, labelIdsValue, star, important) {
 			// 編集
+			$("#url").val(url);
+			$("#title").val(title);
+			$("#description").val(description);
+			
+			var star_button = $("#star_button");
+			if (star) {
+				star_button.removeClass("btn-default");
+				star_button.addClass("btn-danger");
+				$("#star").val("1");
+			} else {
+				star_button.removeClass("btn-danger");
+				star_button.addClass("btn-default");
+				$("#star").val("0");
+			}
+			
+			$("#label_buttons > *").removeClass("btn-info");
+			$("#label_buttons > *").addClass("btn-default");
+			labels = [];
+			
+			var labelIds = labelIdsValue.split(',');
+			for (var i = 0; i < labelIds.length; i++) {
+				$("#label_button_" + labelIds[i]).removeClass("btn-default");
+				$("#label_button_" + labelIds[i]).addClass("btn-info");
+				labels.push(labelIds[i]);
+			}
+			
+			var important_button = $("#important_button");
+			if (important) {
+				important_button.removeClass("btn-default");
+				important_button.addClass("btn-danger");
+				$("#important").val("1");
+			} else {
+				important_button.removeClass("btn-danger");
+				important_button.addClass("btn-default");
+				$("#important").val("0");
+			}
+			
 			$('html,body').animate({ scrollTop: 0 }, 'fast');
 			actions.E02();
 		},
@@ -83,8 +120,6 @@
 				
 				labels.push(labelId);
 			}
-			
-			alert(labels.toString());
 		},
 		E11 : function(labelId) {
 			var btn = $("#" + labelId + "_button");
@@ -127,6 +162,32 @@
 		E13 : function(bookmarkId, labelId, url) {
 			utils.countUp(bookmarkId, labelId);
 			window.open(url, "_new");
+		},
+		E14 : function(bookmarkId, starOrImportant) {
+			
+			var mark = starOrImportant ? "star_" : "important_";
+			var target = $("#mark_" + mark + bookmarkId);
+			var updateValue = target.hasClass("on") ? "0" : "1";
+			var param = starOrImportant ? "star" : "important";
+			
+			$.ajax({
+				url : "/app/bookmark/updateMark?bookmarkId=" + bookmarkId + "&" + param + "=" + updateValue,
+				type : "GET",
+				timeout : 2000,
+				async : true,
+				error : function(req, status, e) {
+					alert("updateMark error !!!");
+				},
+				success : function(res, type) {
+					if(target.hasClass("on")) {
+						target.removeClass("on");
+						target.addClass("off");
+					} else {
+						target.removeClass("off");
+						target.addClass("on");
+					}
+				}
+			});
 		}
 	};
 	
@@ -138,10 +199,16 @@
 				timeout : 2000,
 				async : true,
 				error : function(req, status, e) {
+					alert("countUp error !!!");
 				},
 				success : function(res, type) {
 				}
 			});
+		},
+		test : function() {
+			$("#label_buttons > *").removeClass("btn-info");
+			$("#label_buttons > *").addClass("btn-default");
+			labels = [];
 		}
 	};
 	
@@ -169,9 +236,9 @@
 				</div>
 			</div>
 			<div class="col-sm-10">
-				<button type="button" id="add_button" class="btn btn-info btn-xs" style="display: none;" onclick="actions.E02()">追加する</button>
-				<button type="button" id="invisible_button" class="btn btn-info btn-xs" onclick="actions.E01()">非表示にする</button>
-				<div class="input_area">
+				<button type="button" id="add_button" class="btn btn-info btn-xs" onclick="actions.E02()">ブックマークを追加する</button>
+				<button type="button" id="invisible_button" class="btn btn-info btn-xs" style="display: none;" onclick="actions.E01()">入力エリアを非表示にする</button>
+				<div class="input_area" style="display: none; margin-top: 2px;">
 					<form:form modelAttribute="bookmarkForm" name="bookmark" action="/app/bookmark/add" method="post">
 						<table>
 							<tbody>
@@ -190,9 +257,11 @@
 								<tr>
 									<td><form:label path="label" cssErrorClass="error">LABEL :</form:label></td>
 									<td><form:input path="label" style="width: 200px;" /><br>
+									<span id="label_buttons">
 									<c:forEach items="${labels}" var="label">
 										<button type="button" id="label_button_${label.labelId}" class="btn btn-default btn-xs" onclick="actions.E10('${label.labelId}')">${label.labelName}</button>&nbsp;
 									</c:forEach>
+									</span>
 								</tr>
 								<tr>
 									<td><form:label path="star" cssErrorClass="error">MARK :</form:label></td>
@@ -202,7 +271,8 @@
 								<tr>
 									<td></td>
 									<td><button type="button" class="btn btn-primary btn-sm" onclick="actions.E03()">追加</button>&nbsp;
-										<button type="button" class="btn btn-primary btn-sm" onclick="actions.E04()">更新</button></td>
+										<button type="button" class="btn btn-primary btn-sm" onclick="actions.E04()">更新</button>
+										<button type="button" class="btn btn-primary btn-sm" onclick="utils.test()">テスト</button></td>
 								</tr>
 							</tbody>
 						</table>
@@ -219,11 +289,12 @@
 							<tbody>
 								<c:forEach items="${labelAndBookmarks.value}" var="bookmark">
 									<tr>
-										<td class="star">${bookmark.star ? "☆" : "★"}</td>
-										<td class="important">${bookmark.important ? "◎" : "●"}</td>
+										<td id="mark_star_${bookmark.bookmarkId}" class="star ${bookmark.star ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', true)">★</span></td>
+										<td id="mark_important_${bookmark.bookmarkId}" class="important ${bookmark.important ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', false)">●</span></td>
 										<td class="title"><a href="#" onclick="actions.E13('${bookmark.bookmarkId}', '${labelAndBookmarks.key[0]}', '${bookmark.url}')"><c:out value="${bookmark.title}" /></a></td>
 										<td class="description"><c:out value="${bookmark.description}" /></td>
-										<td class="delete"><button type="button" class="btn btn-default btn-xs" onclick="actions.E05()">編集</button>&nbsp;<button type="button" class="btn btn-default btn-xs" onclick="actions.E06('${bookmark.bookmarkId}')">削除</button></td>
+										<td class="delete"><button type="button" class="btn btn-default btn-xs" onclick="actions.E05('${bookmark.url}', '${bookmark.title}', '${bookmark.description}', '${bookmark.joinedLabelIds}', ${bookmark.star}, ${bookmark.important})">編集</button>&nbsp;<button
+											type="button" class="btn btn-default btn-xs" onclick="actions.E06('${bookmark.bookmarkId}')">削除</button></td>
 									</tr>
 								</c:forEach>
 							</tbody>
