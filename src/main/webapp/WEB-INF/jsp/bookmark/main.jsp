@@ -45,6 +45,27 @@
 			  .appendTo(document.body)
 			  .submit();
 		},
+		E07 : function() {
+			// 検索
+			$('<form/>', {action: '/app/bookmark/select', method: 'get', name: 'select'})
+			  .append($('<input/>', {type: 'hidden', name: 'star', value: "1"}))
+			  .appendTo(document.body)
+			  .submit();
+		},
+		E08 : function() {
+			// 検索
+			$('<form/>', {action: '/app/bookmark/select', method: 'get', name: 'select'})
+			  .append($('<input/>', {type: 'hidden', name: 'important', value: "1"}))
+			  .appendTo(document.body)
+			  .submit();
+		},
+		E09 : function(labelId) {
+			// 検索
+			$('<form/>', {action: '/app/bookmark/select', method: 'get', name: 'select'})
+			  .append($('<input/>', {type: 'hidden', name: 'labelId', value: labelId}))
+			  .appendTo(document.body)
+			  .submit();
+		},
 		E10 : function(labelId) {
 			var btn = $("#label_button_" + labelId);
 			if(btn.hasClass("btn-info")) {
@@ -97,10 +118,28 @@
 					var metas = xmlDoc.getElementsByTagName("meta");
 					for (var i = 0; i < metas.length; i++) {
 						if (metas[i].getAttribute("name") == "description") {
-							//alert(metas[i].getAttribute("content") || metas[i].getAttribute("edit"));
 							$("#description").val(metas[i].getAttribute("content") || metas[i].getAttribute("edit"));
 						}
 					}
+				}
+			});
+		},
+		E13 : function(bookmarkId, labelId, url) {
+			utils.countUp(bookmarkId, labelId);
+			window.open(url, "_new");
+		}
+	};
+	
+	var utils = {
+		countUp : function(bookmarkId, labelId) {
+			$.ajax({
+				url : "/app/bookmark/countUp?bookmarkId=" + bookmarkId + "&labelId=" + labelId,
+				type : "GET",
+				timeout : 2000,
+				async : true,
+				error : function(req, status, e) {
+				},
+				success : function(res, type) {
 				}
 			});
 		}
@@ -121,11 +160,11 @@
 		<div class="row">
 			<div class="col-sm-2">
 				<div class="label_area">
-					<h4>スター</h4>
-					<h4>重要</h4>
+					<h4><a href="#" onclick="actions.E07()">スター</a></h4>
+					<h4><a href="#" onclick="actions.E08()">重要</a></h4>
 					<h4>ラベル</h4>
-					<c:forEach items="${labelAndBookmarks}" var="labelAndBookmarks">
-						<h5><a href="">${labelAndBookmarks.key}</a></h5>
+					<c:forEach items="${labels}" var="labels">
+						<h5><a href="#" onclick="actions.E09('${labels.labelId}')">${labels.labelName}</a></h5>
 					</c:forEach>
 				</div>
 			</div>
@@ -175,14 +214,14 @@
 				</div>
 				<div class="content">
 					<c:forEach items="${labelAndBookmarks}" var="labelAndBookmarks">
-						<h5>${labelAndBookmarks.key}</h5>
+						<h5>${labelAndBookmarks.key[1]}</h5>
 						<table class="table table-striped table-bordered table-hover table-condensed bookmark">
 							<tbody>
 								<c:forEach items="${labelAndBookmarks.value}" var="bookmark">
 									<tr>
 										<td class="star">${bookmark.star ? "☆" : "★"}</td>
 										<td class="important">${bookmark.important ? "◎" : "●"}</td>
-										<td class="title"><a href="${bookmark.url}" target="_blank"><c:out value="${bookmark.title}" /></a></td>
+										<td class="title"><a href="#" onclick="actions.E13('${bookmark.bookmarkId}', '${labelAndBookmarks.key[0]}', '${bookmark.url}')"><c:out value="${bookmark.title}" /></a></td>
 										<td class="description"><c:out value="${bookmark.description}" /></td>
 										<td class="delete"><button type="button" class="btn btn-default btn-xs" onclick="actions.E05()">編集</button>&nbsp;<button type="button" class="btn btn-default btn-xs" onclick="actions.E06('${bookmark.bookmarkId}')">削除</button></td>
 									</tr>

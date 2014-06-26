@@ -1,6 +1,7 @@
 package net.zillions.buffett.controller;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,14 +74,14 @@ public class BookmarkController {
 		List<TbLabel> labels = getLabels(userId);
 		mav.addObject("labels", labels);
 
-		Map<String, List<TbBookmark>> labelAndBookmarks = new LinkedHashMap<>();
+		Map<String[], List<TbBookmark>> labelAndBookmarks = new LinkedHashMap<>();
 		mav.addObject("labelAndBookmarks", labelAndBookmarks);
 
 		if (labels.isEmpty()) {
 			TbBookmarkExample tbBookmarkExample = getTbBookmarkExample(userId);
 			List<TbBookmark> bookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 			if (bookmarks.isEmpty() == false) {
-				labelAndBookmarks.put("ラベル無し", bookmarks);
+				labelAndBookmarks.put(new String[]{"*", "ラベル無し"}, bookmarks);
 			}
 			return mav;
 		}
@@ -99,7 +100,7 @@ public class BookmarkController {
 			tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdIn(bookmarkIds);
 			List<TbBookmark> bookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 
-			labelAndBookmarks.put(label.getLabelName(), bookmarks);
+			labelAndBookmarks.put(new String[]{label.getLabelId().toString(), label.getLabelName()}, bookmarks);
 
 		}
 
@@ -109,7 +110,7 @@ public class BookmarkController {
 			TbBookmarkExample tbBookmarkExample = getTbBookmarkExample(userId);
 			List<TbBookmark> bookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 			if (bookmarks.isEmpty() == false) {
-				labelAndBookmarks.put("ラベル無し", bookmarks);
+				labelAndBookmarks.put(new String[]{"*", "ラベル無し"}, bookmarks);
 			}
 			return mav;
 		}
@@ -119,9 +120,74 @@ public class BookmarkController {
 		tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdNotIn(bookmarkIds);
 		List<TbBookmark> bookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 		if (bookmarks.isEmpty() == false) {
-			labelAndBookmarks.put("ラベル無し", bookmarks);
+			labelAndBookmarks.put(new String[]{"*", "ラベル無し"}, bookmarks);
 		}
 
+		return mav;
+	}
+
+	@RequestMapping("/bookmark/select")
+	public ModelAndView select(HttpServletRequest request) {
+		
+		String userId = DEFALT_USER_ID;
+
+		String starValue = request.getParameter("star");
+		String importantValue = request.getParameter("important");
+		String labelIdValue = request.getParameter("labelId");
+		
+		if ("1".equals(starValue) == false && "1".equals(importantValue) == false && (labelIdValue == null || "".equals(labelIdValue) || BuffettUtils.isDigit(labelIdValue) == false)) {
+			return new ModelAndView("redirect:/app/bookmark/");
+		}
+
+		ModelAndView mav = new ModelAndView("bookmark/main");
+
+		//
+		List<TbLabel> labels = getLabels(userId);
+		mav.addObject("labels", labels);
+		
+		Map<String[], List<TbBookmark>> labelAndBookmarks = new LinkedHashMap<>();
+		mav.addObject("labelAndBookmarks", labelAndBookmarks);
+		
+		TbBookmarkExample tbBookmarkExample = getTbBookmarkExample(userId);
+		List<TbBookmark> tbBookmarks = null;
+		if ("1".equals(starValue)) {
+			tbBookmarkExample.getOredCriteria().get(0).andStarEqualTo(true);
+			tbBookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
+			
+			if (tbBookmarks.isEmpty() == false) {
+				labelAndBookmarks.put(new String[]{"*", "スター"}, tbBookmarks);
+			}
+			
+		} else if("1".equals(importantValue)) {
+			tbBookmarkExample.getOredCriteria().get(0).andImportantEqualTo(true);
+			tbBookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
+			
+			if (tbBookmarks.isEmpty() == false) {
+				labelAndBookmarks.put(new String[]{"*", "重要"}, tbBookmarks);
+			}
+			
+		} else {
+			int labelId = Integer.parseInt(labelIdValue);
+			
+			TbLabel tbLabel = _tbLabelMapper.findByPk(labelId);
+			
+			if (tbLabel != null) {
+				TbLabelBookmarkExample tbLabelBookmarkExample = new TbLabelBookmarkExample();
+				tbLabelBookmarkExample.createCriteria().andLabelIdEqualTo(labelId).andUpdateUserEqualTo(userId);
+				List<TbLabelBookmark> tbLabelBookmarks = _tbLabelBookmarkMapper.selectByEx(tbLabelBookmarkExample);
+				List<Integer> bookmarkIds = new ArrayList<>();
+				for (TbLabelBookmark tbLabelBookmark : tbLabelBookmarks) {
+					bookmarkIds.add(tbLabelBookmark.getBookmarkId());
+				}
+				tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdIn(bookmarkIds);
+				tbBookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
+				
+				if (tbBookmarks.isEmpty() == false) {
+					labelAndBookmarks.put(new String[] {tbLabel.getLabelId().toString(), tbLabel.getLabelName()}, tbBookmarks);
+				}
+			}
+		}
+		
 		return mav;
 	}
 
@@ -341,4 +407,31 @@ public class BookmarkController {
 		return "redirect:/app/bookmark/";
 	}
 
+	@RequestMapping("/bookmark/countUp")
+	public synchronized ModelAndView countUp(HttpServletRequest request) {
+		
+		String userId = DEFALT_USER_ID;
+		
+		String bookmarkIdValue = request.getParameter("bookmarkId");
+		if (BuffettUtils.isDigit(bookmarkIdValue)) {
+			int bookmarkId = Integer.parseInt(bookmarkIdValue);
+			int count = _tbBookmarkMapper.findByPk(bookmarkId).getUseCount();
+			TbBookmark tbBookmark = new TbBookmark(bookmarkId, null, null, null, ++count, null, null, null, null, userId, Calendar.getInstance().getTime(), null);
+			_tbBookmarkMapper.updateByPkSelective(tbBookmark);
+		}
+		
+		String labelIdValue = request.getParameter("labelId");
+		if (BuffettUtils.isDigit(labelIdValue)) {
+			int labelId = Integer.parseInt(labelIdValue);
+			int count = _tbLabelMapper.findByPk(labelId).getUseCount();
+			TbLabel tbLabel = new TbLabel(labelId, null, ++count, null, null, userId, Calendar.getInstance().getTime(), null); 
+			_tbLabelMapper.updateByPkSelective(tbLabel);
+		}
+
+		ModelAndView mav = new ModelAndView("bookmark/rest");
+		mav.addObject("result", "0");
+		return mav;
+	}
+	
+	
 }
