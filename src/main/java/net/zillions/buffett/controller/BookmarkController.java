@@ -148,7 +148,7 @@ public class BookmarkController {
 		tbLabelBookmarkExample.createCriteria().andLabelIdEqualTo(labelId).andCreateUserEqualTo(userId);
 		return _tbLabelBookmarkMapper.countByEx(tbLabelBookmarkExample) > 0;
 	}
-	
+
 	/**
 	 * 
 	 * @param updateUser
@@ -190,7 +190,7 @@ public class BookmarkController {
 	 */
 	@RequestMapping("/bookmark/add")
 	public String add(@Valid BookmarkForm bookmarkForm, BindingResult result, RedirectAttributes attr) {
-		
+
 		if (result.hasErrors()) {
 			attr.addFlashAttribute("org.springframework.validation.BindingResult.bookmarkForm", result);
 			attr.addFlashAttribute("bookmarkForm", bookmarkForm);
@@ -200,9 +200,9 @@ public class BookmarkController {
 		String userId = DEFALT_USER_ID;
 
 		int bookmarkId = addBookmark(bookmarkForm, userId);
-		
+
 		String labelIdsValue = bookmarkForm.getLabelIds();
-		if (labelIdsValue != null) {
+		if (labelIdsValue != null && labelIdsValue.isEmpty() == false) {
 			for (String labelId : labelIdsValue.split(",")) {
 				if (BuffettUtils.isDigit(labelId) == false) {
 					continue;
@@ -210,7 +210,7 @@ public class BookmarkController {
 				_tbLabelBookmarkMapper.insertSelective(new TbLabelBookmark(Integer.parseInt(labelId), bookmarkId, userId, null,
 						userId, null, null));
 			}
-		}		
+		}
 
 		String labelValue = bookmarkForm.getLabel();
 		if (labelValue == null || labelValue.isEmpty()) {
@@ -308,7 +308,7 @@ public class BookmarkController {
 	 */
 	@RequestMapping("/bookmark/delete")
 	public String delete(HttpServletRequest request) {
-		
+
 		String userId = DEFALT_USER_ID;
 
 		String bookmarkIdValue = request.getParameter("bookmarkId");
@@ -318,17 +318,17 @@ public class BookmarkController {
 
 		int bookmarkId = Integer.parseInt(bookmarkIdValue);
 		_tbBookmarkMapper.deleteByPk(bookmarkId);
-		
+
 		TbLabelBookmarkExample tbLabelBookmarkExample = new TbLabelBookmarkExample();
 		tbLabelBookmarkExample.createCriteria().andBookmarkIdEqualTo(bookmarkId).andUpdateUserEqualTo(userId);
 		List<TbLabelBookmark> labelBookmarks = _tbLabelBookmarkMapper.selectByEx(tbLabelBookmarkExample);
-		
+
 		List<Integer> deletedLabelIds = new ArrayList<>();
 		for (TbLabelBookmark labelBookmark : labelBookmarks) {
 			_tbLabelBookmarkMapper.deleteByPk(labelBookmark.getLabelId(), labelBookmark.getBookmarkId());
 			deletedLabelIds.add(labelBookmark.getLabelId());
 		}
-		
+
 		for (Integer deleteLabelId : deletedLabelIds) {
 			tbLabelBookmarkExample = new TbLabelBookmarkExample();
 			tbLabelBookmarkExample.createCriteria().andLabelIdEqualTo(deleteLabelId);
@@ -337,7 +337,6 @@ public class BookmarkController {
 				_tbLabelMapper.deleteByPk(deleteLabelId);
 			}
 		}
-		
 
 		return "redirect:/app/bookmark/";
 	}
