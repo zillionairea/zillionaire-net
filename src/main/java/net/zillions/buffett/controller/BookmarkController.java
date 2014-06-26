@@ -692,7 +692,7 @@ public class BookmarkController {
 		session.setAttribute("consumer", consumer);
 		session.setAttribute("provider", provider);
 
-		String hostName = System.getProperty("HOST_NAME");
+		String hostName = System.getenv("HOST_NAME");
 		if (hostName == null) {
 			hostName = "localhost:8080";
 		}
