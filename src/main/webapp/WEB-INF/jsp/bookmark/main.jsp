@@ -237,7 +237,7 @@
 					<h4><a href="#" onclick="actions.E08()">重要</a></h4>
 					<h4>ラベル</h4>
 					<c:forEach items="${labels}" var="labels">
-						<h5><a href="#" onclick="actions.E09('${labels.labelId}')">${labels.labelName}</a><span class="count">&nbsp<c:if test="${labels.labelId > 0}">(${labels.labelId}, ${labels.useCount})</c:if></span></h5>
+						<h5><a href="#" onclick="actions.E09('${labels[0].labelId}')">${labels[0].labelName}</a><span class="count">&nbsp<c:if test="${labels[0].labelId > 0}">(${labels[1]}, ${labels[0].useCount})</c:if></span></h5>
 					</c:forEach>
 				</div>
 			</div>
@@ -264,9 +264,9 @@
 									<td><form:label path="label" cssErrorClass="error">LABEL :</form:label></td>
 									<td><form:input path="label" style="width: 200px;" /><br>
 									<span id="label_buttons">
-									<c:forEach items="${labels}" var="label">
-										<c:if test="${label.labelId > 0 }">
-											<button type="button" id="label_button_${label.labelId}" class="btn btn-default btn-xs" onclick="actions.E10('${label.labelId}')">${label.labelName}</button>&nbsp;
+									<c:forEach items="${labels}" var="labels">
+										<c:if test="${labels[0].labelId > 0 }">
+											<button type="button" id="label_button_${labels[0].labelId}" class="btn btn-default btn-xs" onclick="actions.E10('${labels[0].labelId}')">${labels[0].labelName}</button>&nbsp;
 										</c:if>
 									</c:forEach>
 									</span>
@@ -292,14 +292,14 @@
 				</div>
 				<div class="content">
 					<c:forEach items="${labelAndBookmarks}" var="labelAndBookmarks">
-						<h5>${labelAndBookmarks.key[1]}</h5>
+						<span style="font-size: large;">${labelAndBookmarks.key[1]}</span>
 						<table class="table table-striped table-bordered table-hover table-condensed bookmark">
 							<tbody>
 								<c:forEach items="${labelAndBookmarks.value}" var="bookmark">
 									<tr>
 										<td id="mark_star_${bookmark.bookmarkId}" class="star ${bookmark.star ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', true)">★</span></td>
 										<td id="mark_important_${bookmark.bookmarkId}" class="important ${bookmark.important ? 'on' : 'off'}"><span class="mark" onclick="actions.E14('${bookmark.bookmarkId}', false)">◆</span></td>
-										<td class="title"><a href="#" onclick="actions.E13('${bookmark.bookmarkId}', '${labelAndBookmarks.key[0]}', '${bookmark.url}')"><c:out value="${bookmark.title}" /></a><span class="count">&nbsp(${bookmark.bookmarkId},${bookmark.useCount})</span></td>
+										<td class="title"><a href="#" onclick="actions.E13('${bookmark.bookmarkId}', '${labelAndBookmarks.key[0]}', '${bookmark.url}')"><c:out value="${bookmark.title}" /></a><span class="count">&nbsp(${bookmark.useCount})</span></td>
 										<td class="description"><c:out value="${bookmark.description}" /></td>
 										<td class="delete"><button type="button" class="btn btn-default btn-xs" onclick="actions.E05('${bookmark.bookmarkId}', '${bookmark.url}', '<c:out value="${bookmark.title}" />', '<c:out value="${bookmark.description}" />', '${bookmark.joinedLabelIds}', ${bookmark.star}, ${bookmark.important})">編集</button>&nbsp;<button
 											type="button" class="btn btn-default btn-xs" onclick="actions.E06('${bookmark.bookmarkId}')">削除</button></td>

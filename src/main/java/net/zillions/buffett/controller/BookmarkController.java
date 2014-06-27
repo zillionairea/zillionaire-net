@@ -100,7 +100,7 @@ public class BookmarkController {
 //		}
 
 		//
-		List<TbLabel> labels = getLabels(userId);
+		List<Object[]> labels = getLabels(userId);
 		mav.addObject("labels", labels);
 
 		Map<String[], List<TbBookmark>> labelAndBookmarks = new LinkedHashMap<>();
@@ -115,9 +115,9 @@ public class BookmarkController {
 			return mav;
 		}
 
-		for (TbLabel label : labels) {
+		for (Object[] label : labels) {
 
-			int labelId = label.getLabelId();
+			int labelId = ((TbLabel)label[0]).getLabelId();
 			if (isLabelBookmarkExist(labelId, userId) == false) {
 				continue;
 			}
@@ -129,7 +129,8 @@ public class BookmarkController {
 			tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdIn(bookmarkIds);
 			List<TbBookmark> bookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 
-			labelAndBookmarks.put(new String[] {label.getLabelId().toString(), label.getLabelName()},
+			labelAndBookmarks.put(
+					new String[] {((TbLabel) label[0]).getLabelId().toString(), ((TbLabel) label[0]).getLabelName()},
 					TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(bookmarks));
 
 		}
@@ -140,7 +141,8 @@ public class BookmarkController {
 			TbBookmarkExample tbBookmarkExample = getTbBookmarkExample(userId);
 			List<TbBookmark> bookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 			if (bookmarks.isEmpty() == false) {
-				labelAndBookmarks.put(new String[] {"-1", "ラベル無し"}, TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(bookmarks));
+				labelAndBookmarks.put(new String[] {"-1", "ラベル無し"},
+						TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(bookmarks));
 			}
 			return mav;
 		}
@@ -150,7 +152,8 @@ public class BookmarkController {
 		tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdNotIn(bookmarkIds);
 		List<TbBookmark> bookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 		if (bookmarks.isEmpty() == false) {
-			labelAndBookmarks.put(new String[] {"-1", "ラベル無し"}, TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(bookmarks));
+			labelAndBookmarks.put(new String[] {"-1", "ラベル無し"},
+					TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(bookmarks));
 		}
 
 		return mav;
@@ -176,7 +179,7 @@ public class BookmarkController {
 		ModelAndView mav = new ModelAndView("bookmark/main");
 
 		//
-		List<TbLabel> labels = getLabels(userId);
+		List<Object[]> labels = getLabels(userId);
 		mav.addObject("labels", labels);
 
 		Map<String[], List<TbBookmark>> labelAndBookmarks = new LinkedHashMap<>();
@@ -225,7 +228,8 @@ public class BookmarkController {
 					tbBookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
 
 					if (tbBookmarks.isEmpty() == false) {
-						labelAndBookmarks.put(new String[] {tbLabel.getLabelId().toString(), tbLabel.getLabelName()},
+						labelAndBookmarks.put(
+								new String[] {tbLabel.getLabelId().toString(), tbLabel.getLabelName()},
 								TbBookmarkWithLabelIds.getTbBookmarkWithLabelIds(tbBookmarks));
 					}
 				} else {
@@ -258,30 +262,59 @@ public class BookmarkController {
 	 * @param updateUser
 	 * @return
 	 */
-	private List<TbLabel> getLabels(String updateUser) {
+	private List<Object[]> getLabels(String updateUser) {
 		TbLabelExample tbLabelExample = new TbLabelExample();
 		tbLabelExample.createCriteria().andUpdateUserEqualTo(updateUser);
 		tbLabelExample.setOrderByClause("use_count desc");
-		List<TbLabel> labels = _tbLabelMapper.selectByEx(tbLabelExample);
-
-		// ラベルが無いブックマークがないか探す
-		TbBookmarkExample tbBookmarkExample = new TbBookmarkExample();
-		tbBookmarkExample.createCriteria().andUpdateUserEqualTo(updateUser);
-		List<TbBookmark> tbBookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
-
-		for (TbBookmark tbBookmark : tbBookmarks) {
-			int bookmarkId = tbBookmark.getBookmarkId();
-
-			TbLabelBookmarkExample tbLabelBookmarkExample = new TbLabelBookmarkExample();
-			tbLabelBookmarkExample.createCriteria().andBookmarkIdEqualTo(bookmarkId);
-			if (0 == _tbLabelBookmarkMapper.countByEx(tbLabelBookmarkExample)) {
-				TbLabel tbLabel = new TbLabel(-1, "ラベル無し", null, null, null, null, null, null);
-				labels.add(tbLabel);
-				break;
-			}
+		List<TbLabel> tbLabels = _tbLabelMapper.selectByEx(tbLabelExample);
+		
+		List<Object[]> result = new ArrayList<>();
+		
+		TbLabelBookmarkExample tbLabelBookmarkExample = new TbLabelBookmarkExample();
+		for (TbLabel tbLabel : tbLabels){
+			tbLabelBookmarkExample.createCriteria().andLabelIdEqualTo(tbLabel.getLabelId());
+			int count = _tbLabelBookmarkMapper.countByEx(tbLabelBookmarkExample);
+			Object[] obj = new Object[]{tbLabel, count};
+			result.add(obj);
 		}
+		
+		// ラベルが無いブックマークがないか探す
+		tbLabelBookmarkExample = new TbLabelBookmarkExample();
+		tbLabelBookmarkExample.createCriteria().andUpdateUserEqualTo(updateUser);
+		List<TbLabelBookmark> tbLabelBookmarks = _tbLabelBookmarkMapper.selectByEx(tbLabelBookmarkExample);
+		
+		List<Integer> bookmarkIds = new ArrayList<>();
+		for (TbLabelBookmark tbLabelBookmark : tbLabelBookmarks) {
+			bookmarkIds.add(tbLabelBookmark.getBookmarkId());
+		}
+		
+		TbBookmarkExample tbBookmarkExample = getTbBookmarkExample(updateUser);
+		tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdNotIn(bookmarkIds);
+		int size = _tbBookmarkMapper.countByEx(tbBookmarkExample);
+		if (size > 0) {
+			TbLabel tbLabel = new TbLabel(-1, "ラベル無し", null, null, null, null, null, null);
+			result.add(new Object[]{tbLabel, size});
+		}
+		
+		return result;
+		
+//		TbBookmarkExample tbBookmarkExample = new TbBookmarkExample();
+//		tbBookmarkExample.createCriteria().andUpdateUserEqualTo(updateUser);
+//		List<TbBookmark> tbBookmarks = _tbBookmarkMapper.selectByEx(tbBookmarkExample);
+//
+//		for (TbBookmark tbBookmark : tbBookmarks) {
+//			int bookmarkId = tbBookmark.getBookmarkId();
+//
+//			tbLabelBookmarkExample = new TbLabelBookmarkExample();
+//			tbLabelBookmarkExample.createCriteria().andBookmarkIdEqualTo(bookmarkId);
+//			if (0 == _tbLabelBookmarkMapper.countByEx(tbLabelBookmarkExample)) {
+//				TbLabel tbLabel = new TbLabel(-1, "ラベル無し", null, null, null, null, null, null);
+//				tbLabels.add(tbLabel);
+//				break;
+//			}
+//		}
 
-		return labels;
+//		return tbLabels;
 	}
 
 	/**
@@ -731,9 +764,8 @@ public class BookmarkController {
 			setUrl(tbBookmark.getUrl());
 			setUseCount(tbBookmark.getUseCount());
 
-			int bookmarkId = getBookmarkId();
 			TbLabelBookmarkExample tbLabelBookmarkExample = new TbLabelBookmarkExample();
-			tbLabelBookmarkExample.createCriteria().andBookmarkIdEqualTo(bookmarkId);
+			tbLabelBookmarkExample.createCriteria().andBookmarkIdEqualTo(getBookmarkId());
 			List<TbLabelBookmark> tbLabelBookmarks = MapperFactory.getMapper(TbLabelBookmarkMapper.class).selectByEx(
 					tbLabelBookmarkExample);
 			for (TbLabelBookmark tbLabelBookmark : tbLabelBookmarks) {
