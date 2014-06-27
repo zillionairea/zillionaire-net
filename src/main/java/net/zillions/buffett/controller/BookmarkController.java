@@ -274,12 +274,12 @@ public class BookmarkController {
 		
 		List<Object[]> result = new ArrayList<>();
 		
-		TbLabelBookmarkExample tbLabelBookmarkExample = new TbLabelBookmarkExample();
+		TbLabelBookmarkExample tbLabelBookmarkExample = null;
 		for (TbLabel tbLabel : tbLabels){
+			tbLabelBookmarkExample = new TbLabelBookmarkExample();
 			tbLabelBookmarkExample.createCriteria().andLabelIdEqualTo(tbLabel.getLabelId());
 			int count = _tbLabelBookmarkMapper.countByEx(tbLabelBookmarkExample);
-			Object[] obj = new Object[]{tbLabel, count};
-			result.add(obj);
+			result.add(new Object[]{tbLabel, count});
 		}
 		
 		// ラベルが無いブックマークがないか探す
