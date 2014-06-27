@@ -73,10 +73,12 @@ public class BookmarkController {
 	 * @return
 	 */
 	@RequestMapping("/bookmark/")
-	public ModelAndView init(HttpServletRequest request, HttpSession session) throws OAuthException {
+	public ModelAndView init(HttpServletRequest request) throws OAuthException {
 
 		String userId = DEFALT_USER_ID;
 		ModelAndView mav = new ModelAndView("bookmark/main");
+		
+		HttpSession session = request.getSession(true);
 
 		if (session.getAttribute("consumer") != null && session.getAttribute("userId") == null) {
 			OAuthConsumer consumer = (OAuthConsumer) session.getAttribute("consumer");
@@ -160,7 +162,9 @@ public class BookmarkController {
 	}
 
 	@RequestMapping("/bookmark/select")
-	public ModelAndView select(HttpServletRequest request, HttpSession session) {
+	public ModelAndView select(HttpServletRequest request) {
+		
+		HttpSession session = request.getSession(false);
 
 		String userId = DEFALT_USER_ID;
 		if (session.getAttribute("userId") != null) {
@@ -288,12 +292,14 @@ public class BookmarkController {
 			bookmarkIds.add(tbLabelBookmark.getBookmarkId());
 		}
 		
-		TbBookmarkExample tbBookmarkExample = getTbBookmarkExample(updateUser);
-		tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdNotIn(bookmarkIds);
-		int size = _tbBookmarkMapper.countByEx(tbBookmarkExample);
-		if (size > 0) {
-			TbLabel tbLabel = new TbLabel(-1, "ラベル無し", null, null, null, null, null, null);
-			result.add(new Object[]{tbLabel, size});
+		if (bookmarkIds.size() > 0) {
+			TbBookmarkExample tbBookmarkExample = getTbBookmarkExample(updateUser);
+			tbBookmarkExample.getOredCriteria().get(0).andBookmarkIdNotIn(bookmarkIds);
+			int size = _tbBookmarkMapper.countByEx(tbBookmarkExample);
+			if (size > 0) {
+				TbLabel tbLabel = new TbLabel(-1, "ラベル無し", null, null, null, null, null, null);
+				result.add(new Object[]{tbLabel, size});
+			}
 		}
 		
 		return result;
@@ -581,8 +587,10 @@ public class BookmarkController {
 	}
 
 	@RequestMapping("/bookmark/updateMark")
-	public ModelAndView updateMark(HttpServletRequest request, HttpSession session) {
+	public ModelAndView updateMark(HttpServletRequest request) {
 
+		HttpSession session = request.getSession(false);
+		
 		String userId = DEFALT_USER_ID;
 		if (session.getAttribute("userId") != null) {
 			userId = session.getAttribute("userId").toString();
@@ -622,8 +630,10 @@ public class BookmarkController {
 	 * @return
 	 */
 	@RequestMapping("/bookmark/delete")
-	public String delete(HttpServletRequest request, HttpSession session) {
+	public String delete(HttpServletRequest request) {
 
+		HttpSession session = request.getSession(false);
+		
 		String userId = DEFALT_USER_ID;
 		if (session.getAttribute("userId") != null) {
 			userId = session.getAttribute("userId").toString();
@@ -679,8 +689,10 @@ public class BookmarkController {
 	}
 
 	@RequestMapping("/bookmark/countUp")
-	public synchronized ModelAndView countUp(HttpServletRequest request, HttpSession session) {
+	public synchronized ModelAndView countUp(HttpServletRequest request) {
 
+		HttpSession session = request.getSession(false);
+		
 		String userId = DEFALT_USER_ID;
 		if (session.getAttribute("userId") != null) {
 			userId = session.getAttribute("userId").toString();
@@ -713,8 +725,8 @@ public class BookmarkController {
 
 		// @formatter:off
 		OAuthConsumer consumer = new DefaultOAuthConsumer(
-				"KrR7XUS4M5hzPB5Cx86BtbVLt",
-				"yh8T8JvHrCdzUEVHLmvtCktYKCD3GTBVYRdRW2IMRdjarOrnDu");
+				System.getenv("CONSUMER_KEY"),
+				System.getenv("CONSUMER_SECRET"));
 		
 		OAuthProvider provider = new DefaultOAuthProvider(
 				"https://api.twitter.com/oauth/request_token",
